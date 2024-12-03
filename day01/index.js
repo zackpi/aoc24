@@ -1,11 +1,9 @@
 let pairs = (await Bun.file("day01/input").text())
   .split("\n")
-  .map((line) => line.split("   ").map(Number));
-const col = (i) => pairs.map((pair) => pair[i]).toSorted((a, b) => a - b);
-let left = col(0);
-let right = col(1);
+  .map((l) => l.split("   ").map(Number));
+let [left, right] = [0, 1].map((i) => pairs.map((p) => p[i]).toSorted());
 
-let part1 = left.reduce((prev, curr, i) => prev + Math.abs(curr - right[i]), 0);
+let part1 = left.reduce((sum, leftV, i) => sum + Math.abs(leftV - right[i]), 0);
 console.log("part1 =", part1);
 // =3246517
 
