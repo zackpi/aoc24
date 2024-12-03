@@ -1,9 +1,5 @@
 let raw = await Bun.file("day03/input").text();
-let mul = (s) =>
-  s
-    .match(/\d+/g)
-    .map(Number)
-    .reduce((a, b) => a * b, 1);
+let mul = (s) => eval(s.match(/\d+/g).join("*"));
 
 let part1 = raw.match(/mul\(\d+\,\d+\)/g).reduce((sum, s) => sum + mul(s), 0);
 console.log("part1 =", part1);
