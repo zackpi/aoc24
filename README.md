@@ -1,15 +1,7 @@
-# aoc
+# Advent of Code 2024
 
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
+To run: (replace `XX` with e.g. `01` for `day01`)
 
 ```bash
-bun run index.ts
+bun run dayXX/index.js
 ```
-
-This project was created using `bun init` in bun v1.1.18. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
