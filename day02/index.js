@@ -1,6 +1,5 @@
-let reports = (await Bun.file("day02/input").text())
-  .split("\n")
-  .map((l) => l.split(" ").map(Number));
+let raw = await Bun.file("day02/input").text();
+let reports = raw.split("\n").map((l) => l.split(" ").map(Number));
 
 let bounds = (a) => a.map(Math.abs).every((d) => d > 0 && d < 4);
 let mono = (a) => a.slice(1).every((d, i) => Math.sign(d) === Math.sign(a[i]));
@@ -11,6 +10,8 @@ let part1 = reports.filter(safe).length;
 console.log("part1 =", part1);
 // =483
 
-let part2 = reports.filter((a) => a.map((_, i) => a.filter((_, j) => j != i)).find(safe)).length;
+let part2 = reports.filter((a) =>
+  a.map((_, i) => a.filter((_, j) => j != i)).find(safe)
+).length;
 console.log("part2 =", part2);
 // =528
