@@ -18,11 +18,7 @@ let part1 = range(0, rows)
     )
   )
   .flat(3)
-  .reduce(
-    (count, l) =>
-      count + (!l.find(oob) && l.map(char).join("") === "XMAS" ? 1 : 0),
-    0
-  );
+  .filter((l) => !l.find(oob) && l.map(char).join("") === "XMAS").length;
 
 console.log("part1 =", part1);
 // =2406
@@ -38,11 +34,7 @@ let corners = (p) => [
 let patterns = ["AMMSS", "ASSMM", "AMSMS", "ASMSM"];
 let part2 = range(1, rows - 1)
   .flatMap((r) => range(1, cols - 1).map((c) => [c, r]))
-  .reduce(
-    (count, root) =>
-      count + (patterns.includes(corners(root).map(char).join("")) ? 1 : 0),
-    0
-  );
+  .filter((root) => patterns.includes(corners(root).map(char).join(""))).length;
 
 console.log("part2 =", part2);
 // =1807
