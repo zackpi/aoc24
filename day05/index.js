@@ -9,16 +9,15 @@ let updates = updatesRaw.split("\n").map((l) => l.split(","));
 
 const ordered = (u) =>
   u.every((vi, i) => !u.find((vj, j) => j < i && rules[vi]?.includes(vj)));
+const addMiddle = (s, u) => s + Number(u[Math.trunc(u.length / 2)]);
 
-let part1 = updates
-  .filter(ordered)
-  .reduce((sum, u) => sum + Number(u[Math.trunc(u.length / 2)]), 0);
+let part1 = updates.filter(ordered).reduce(addMiddle, 0);
 console.log("part1 =", part1);
 // =6505
 
 let part2 = updates
   .filter((u) => !ordered(u))
   .map((u) => u.toSorted((a, b) => (rules[b]?.includes(a) ? -1 : 1)))
-  .reduce((sum, u) => sum + Number(u[Math.trunc(u.length / 2)]), 0);
+  .reduce(addMiddle, 0);
 console.log("part2 =", part2);
 // =6897
