@@ -17,6 +17,16 @@ let step = (i, d) =>
     : [i + 1, x(i) > w - 2];
 let rotate = (d) => (d === "v" ? "<" : d === "<" ? "^" : d === "^" ? ">" : "v");
 
+let step2 = (i, d) =>
+  d === D
+    ? [i + w, y(i) > h - 2]
+    : d === L
+    ? [i - 1, x(i) < 1]
+    : d === U
+    ? [i - w, y(i) < 1]
+    : [i + 1, x(i) > w - 2];
+let rotate2 = (d) => (d === D ? L : d === L ? U : d === U ? R : D);
+
 function walkPart1(grid, i, dir) {
   let steps = 1;
   while (1) {
@@ -42,33 +52,46 @@ console.log("part1 =", part1);
 
 function walkInner(grid, i, dir) {
   while (1) {
-    let [next, oob] = step(i, dir);
+    let [next, oob] = step2(i, dir);
     if (oob) return false;
-    let char = grid[next];
-    if (char === "O") return true;
-    if (char === "#") {
-      grid = setChar(grid, next, "O");
-      dir = rotate(dir);
+    let c = grid[next];
+    if ((c & dir) > 0) return true;
+    if (c > 0) {
+      grid[next] |= dir;
+      dir = rotate2(dir);
     } else i = next;
   }
 }
 
 function walkPart2(grid, i, dir) {
   let loops = [];
+  let outer = [...grid];
   while (1) {
-    grid = setChar(grid, i, dir);
-    let [next, oob] = step(i, dir);
+    outer[i] = dir;
+    let [next, oob] = step2(i, dir);
     if (oob) break;
-    let char = grid[next];
-    if (char === "#") dir = rotate(dir);
+    let c = outer[next];
+    if (c === X) dir = rotate2(dir);
     else {
-      if (walkInner(setChar(grid, next, "O"), i, rotate(dir))) loops.push(next);
+      if (c === 0) {
+        let inner = [...grid];
+        inner[next] = dir;
+        if (walkInner(inner, i, rotate2(dir))) loops.push(next);
+      }
+
       i = next;
     }
   }
   return new Set(loops).size;
 }
 
-let part2 = walkPart2(gridInit, guard, "^");
+let U = 1;
+let R = 2;
+let D = 4;
+let L = 8;
+let X = 16;
+let garr = gridInit.split("").map((c) => (c === "#" ? X : 0));
+
+let part2 = walkPart2(garr, guard, U);
 console.log("part2 =", part2);
-// =
+// =1721
