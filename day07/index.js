@@ -1,40 +1,29 @@
 let raw = await Bun.file("day07/input").text();
-let lines = raw.split("\n").map((l) => l.split(": "));
+let lines = raw
+  .split("\n")
+  .map((l) => l.split(": "))
+  .map(([r, args]) => [r, args.split(" ")]);
 
-function hasOperatorMatch(args, retVal) {
-  let res = [args[0]];
-  for (let i = 1; i < args.length; i++) {
-    res = res.flatMap((r) => [r + args[i], r * args[i]]);
-  }
-  return res.find((r) => r === retVal);
-}
+const sumMatches = (ops) =>
+  lines.reduce(
+    (sum, [rets, args]) =>
+      sum +
+      (args
+        .slice(1)
+        .reduce(
+          (vals, a) => vals.flatMap((r) => ops.map((o) => eval(r + o + a))),
+          [args[0]]
+        )
+        .find((val) => val === eval(rets))
+        ? eval(rets)
+        : 0),
+    0
+  );
 
-let part1 = 0;
-for (let [ret, argStr] of lines) {
-  let retVal = Number(ret);
-  let args = argStr.split(" ").map(Number);
-  if (hasOperatorMatch(args, retVal)) part1 += retVal;
-}
+let part1 = sumMatches(["+", "*"]);
 console.log("part1 =", part1);
 // =882304362421
 
-function hasOperatorMatch2(args, retVal) {
-  let res = [args[0]];
-  for (let i = 1; i < args.length; i++) {
-    res = res.flatMap((r) => [
-      r + args[i],
-      r * args[i],
-      eval(r + "" + args[i]),
-    ]);
-  }
-  return res.find((r) => r === retVal);
-}
-
-let part2 = 0;
-for (let [ret, argStr] of lines) {
-  let retVal = Number(ret);
-  let args = argStr.split(" ").map(Number);
-  if (hasOperatorMatch2(args, retVal)) part2 += retVal;
-}
+let part2 = sumMatches(["+", "*", ""]);
 console.log("part2 =", part2);
 // =145149066755184
