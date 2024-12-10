@@ -11,52 +11,32 @@ let dirs = [
   [0, 1],
 ];
 
-let part1 = (() => {
-  let zeros = [];
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      if (data[y][x] === 0) zeros.push([x, y]);
-    }
+let zeros = [];
+for (let y = 0; y < h; y++) {
+  for (let x = 0; x < w; x++) {
+    if (data[y][x] === 0) zeros.push([x, y]);
   }
+}
 
-  function score(c) {
-    let coords = [c];
-    for (let i = 1; i <= 9; i++) {
-      coords = coords.flatMap((c) =>
-        dirs
-          .map((d) => [c[0] + d[0], c[1] + d[1]])
-          .filter((n) => !oob(n) && data[n[1]][n[0]] === i)
-      );
-    }
-    return new Set(coords.map((c) => c.join(","))).size;
+function trails(c) {
+  let cs = [c];
+  for (let i = 1; i <= 9; i++) {
+    cs = cs.flatMap((c) =>
+      dirs
+        .map((d) => [c[0] + d[0], c[1] + d[1]])
+        .filter((n) => !oob(n) && data[n[1]][n[0]] === i)
+    );
   }
+  return cs;
+}
 
-  return zeros.map(score).reduce((a, b) => a + b, 0);
-})();
+let score = (cs) => new Set(cs.map((c) => c.join(","))).size;
+let rating = (cs) => cs.length;
+
+let part1 = zeros.reduce((sum, cs) => sum + score(trails(cs)), 0);
 console.log("part1 =", part1);
-// =
+// =646
 
-let part2 = (() => {
-  let zeros = [];
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      if (data[y][x] === 0) zeros.push([x, y]);
-    }
-  }
-
-  function rating(c) {
-    let coords = [c];
-    for (let i = 1; i <= 9; i++) {
-      coords = coords.flatMap((c) =>
-        dirs
-          .map((d) => [c[0] + d[0], c[1] + d[1]])
-          .filter((n) => !oob(n) && data[n[1]][n[0]] === i)
-      );
-    }
-    return coords.length;
-  }
-
-  return zeros.map(rating).reduce((a, b) => a + b, 0);
-})();
+let part2 = zeros.reduce((sum, cs) => sum + rating(trails(cs)), 0);
 console.log("part2 =", part2);
-// =
+// =1494
