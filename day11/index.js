@@ -1,37 +1,31 @@
 let raw = await Bun.file("day11/input").text();
 let stones = raw.split(" ").map(Number);
 
-let memo = {};
-function blink(s, lvl) {
+function blink(stone, lvl) {
   if (lvl <= 0) return 1;
-  if (s + "_" + lvl in memo) return memo[s + "_" + lvl];
+  if (stone === 0) return blinkMemo(1, lvl - 1);
 
-  if (s === 0) {
-    let ret = blink(1, lvl - 1);
-    memo[s + "_" + lvl] = ret;
-    return ret;
-  }
+  let l = Math.trunc(Math.log10(stone) + 1);
+  if (l % 2 !== 0) return blinkMemo(2024 * stone, lvl - 1);
 
-  let l = Math.trunc(Math.log10(s) + 1);
-  if (l % 2 !== 0) {
-    let ret = blink(2024 * s, lvl - 1);
-    memo[s + "_" + lvl] = ret;
-    return ret;
-  }
+  let left = Number((stone + "").slice(0, l / 2));
+  let right = Number((stone + "").slice(l / 2));
+  return blinkMemo(left, lvl - 1) + blinkMemo(right, lvl - 1);
+}
 
-  let str = s + "";
-  let left = Number(str.slice(0, l / 2));
-  let right = Number(str.slice(l / 2));
-
-  let ret = blink(left, lvl - 1) + blink(right, lvl - 1);
-  memo[s + "_" + lvl] = ret;
+let memo = {};
+const key = (s, l) => s + "_" + l;
+function blinkMemo(stone, lvl) {
+  if (key(stone, lvl) in memo) return memo[key(stone, lvl)];
+  let ret = blink(stone, lvl);
+  memo[key(stone, lvl)] = ret;
   return ret;
 }
 
-let part1 = stones.reduce((sum, stone) => sum + blink(stone, 25), 0);
+let part1 = stones.reduce((sum, stone) => sum + blinkMemo(stone, 25), 0);
 console.log("part1 =", part1);
-// =
+// =186996
 
-let part2 = stones.reduce((sum, stone) => sum + blink(stone, 75), 0);
+let part2 = stones.reduce((sum, stone) => sum + blinkMemo(stone, 75), 0);
 console.log("part2 =", part2);
-// =
+// =221683913164898
