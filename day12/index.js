@@ -6,18 +6,15 @@ let w = cells[0].length;
 
 let k = ([x, y]) => x + "_" + y;
 let seen = new Set();
-
 let grid = () => Array.from({ length: h + 1 }).map(() => Array(w + 1).fill(0));
 
-function buildClique(r) {
-  let letter = cells[r[1]][r[0]];
-  let clique = [r];
-  let nodes = [r];
-  seen.add(k(r));
-
+function clique(r) {
   let verts = grid();
   let horiz = grid();
 
+  seen.add(k(r));
+  let nodes = [r];
+  let area = 1;
   while (nodes.length) {
     let nextNodes = [];
     for (let n of nodes) {
@@ -37,44 +34,42 @@ function buildClique(r) {
         let [x, y] = adj;
         if (x < 0 || x >= w || y < 0 || y >= h) continue;
         if (seen.has(k(adj))) continue;
-        if (cells[y][x] !== letter) continue;
+        if (cells[y][x] !== cells[r[1]][r[0]]) continue;
 
         nextNodes.push(adj);
-        clique.push(adj);
+        area++;
         seen.add(k(adj));
       }
     }
     nodes = nextNodes;
   }
 
-  let perimeter = 0;
-  let nHoriz = 0;
+  let perim = 0;
+  let edges = 0;
   for (let j = 0; j < h + 1; j++) {
-    let onedge = 0;
+    let prev = 0;
     for (let i = 0; i < w; i++) {
       let h = horiz[j][i];
       if (h !== 0) {
-        perimeter++;
-        if (h !== onedge) nHoriz++;
+        perim++;
+        if (h !== prev) edges++;
       }
-      onedge = h;
+      prev = h;
     }
   }
-  let nVerts = 0;
   for (let i = 0; i < w + 1; i++) {
-    let onedge = 0;
+    let prev = 0;
     for (let j = 0; j < h; j++) {
       let v = verts[j][i];
       if (v !== 0) {
-        perimeter++;
-        if (v !== onedge) nVerts++;
+        perim++;
+        if (v !== prev) edges++;
       }
-      onedge = v;
+      prev = v;
     }
   }
-  let uniques = nVerts + nHoriz;
 
-  return [clique.length, perimeter, uniques];
+  return [area, perim, edges];
 }
 
 let part1 = 0;
@@ -84,7 +79,7 @@ for (let j = 0; j < h; j++) {
     let root = [i, j];
     if (seen.has(k(root))) continue;
 
-    let [area, perimeter, uniques] = buildClique(root);
+    let [area, perimeter, uniques] = clique(root);
     part1 += area * perimeter;
     part2 += area * uniques;
   }
