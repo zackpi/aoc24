@@ -1,4 +1,4 @@
-let raw = await Bun.file("day15/input_small").text();
+let raw = await Bun.file("day15/input").text();
 let [gridRaw, movesRaw] = raw.split("\n\n");
 let moves = movesRaw.replaceAll("\n", "");
 let grid = gridRaw.split("\n").map((row) => row.split(""));
@@ -45,7 +45,7 @@ for (let y = 0; y < h; y++) {
   }
 }
 console.log("part1 =", part1);
-// =
+// =1471826
 
 let grid2 = gridRaw.split("\n").map((row) =>
   row.split("").flatMap((c) => {
@@ -57,31 +57,167 @@ let grid2 = gridRaw.split("\n").map((row) =>
   })
 );
 
-[x, y] = [2 * (bot % w), (bot / w) | 0];
-for (let move of moves) {
-  let [dx, dy] = [
-    move == "<" ? -1 : move == ">" ? 1 : 0,
-    move == "^" ? -1 : move == "v" ? 1 : 0,
-  ];
+let dir = (m) => [
+  m == "<" ? -1 : m == ">" ? 1 : 0,
+  m == "^" ? -1 : m == "v" ? 1 : 0,
+];
+let canMove = (x, y, m) => {
+  let curr = grid2[y][x];
+  let [dx, dy] = dir(m);
   let [nx, ny] = [x + dx, y + dy];
   let next = grid2[ny][nx];
-  if (next == "#") continue;
-  if (next == "[" || next == "]") {
-    continue;
-  } else if (next == ".") {
-    grid2[ny][nx] = "@";
-    grid2[y][x] = ".";
-    [x, y] = [nx, ny];
+
+  if (m == "<") {
+    if (next == "#") return false;
+    else if (next == "]") {
+      return canMove(nx - 1, ny, m);
+    } else if (next == ".") {
+      return true;
+    }
+  } else if (m == ">") {
+    if (next == "#") return false;
+    else if (next == "[") {
+      return canMove(nx + 1, ny, m);
+    } else if (next == ".") {
+      return true;
+    }
+  } else if (m == "v") {
+    if (next == "#") return false;
+    else if (next == "[") {
+      return canMove(nx, ny, m) && canMove(nx + 1, ny, m);
+    } else if (next == "]") {
+      return canMove(nx - 1, ny, m) && canMove(nx, ny, m);
+    } else if (next == ".") {
+      return true;
+    }
+  } else if (m == "^") {
+    if (next == "#") return false;
+    else if (next == "[") {
+      return canMove(nx, ny, m) && canMove(nx + 1, ny, m);
+    } else if (next == "]") {
+      return canMove(nx - 1, ny, m) && canMove(nx, ny, m);
+    } else if (next == ".") {
+      return true;
+    }
   }
 
-  await Bun.sleep(300);
-  console.clear();
-  console.log(grid2.map((row) => row.join("")).join("\n"));
-  console.log("move =", move);
+  return false;
+};
+let move = (x, y, m) => {
+  let curr = grid2[y][x];
+  let [dx, dy] = dir(m);
+  let [nx, ny] = [x + dx, y + dy];
+  let next = grid2[ny][nx];
+
+  if (m == "<") {
+    if (next == "#") return false;
+    else if (next == "]") {
+      if (move(nx - 1, ny, m)) {
+        grid2[ny][nx - 2] = "[";
+        grid2[ny][nx - 1] = "]";
+        grid2[ny][nx] = curr;
+        grid2[y][x] = ".";
+        return true;
+      }
+    } else if (next == ".") {
+      grid2[ny][nx] = curr;
+      grid2[y][x] = ".";
+      return true;
+    }
+  } else if (m == ">") {
+    if (next == "#") return false;
+    else if (next == "[") {
+      if (move(nx + 1, ny, m)) {
+        grid2[ny][nx + 1] = "[";
+        grid2[ny][nx + 2] = "]";
+        grid2[ny][nx] = curr;
+        grid2[y][x] = ".";
+        return true;
+      }
+    } else if (next == ".") {
+      grid2[ny][nx] = curr;
+      grid2[y][x] = ".";
+      return true;
+    }
+  } else if (m == "v") {
+    if (next == "#") return false;
+    else if (next == "[") {
+      let movedLeft = move(nx, ny, m);
+      let movedRight = move(nx + 1, ny, m);
+      if (movedLeft && movedRight) {
+        grid2[ny + 1][nx] = "[";
+        grid2[ny + 1][nx + 1] = "]";
+        grid2[ny][nx] = curr;
+        grid2[ny][nx + 1] = ".";
+        grid2[y][x] = ".";
+        return true;
+      }
+    } else if (next == "]") {
+      let movedLeft = move(nx - 1, ny, m);
+      let movedRight = move(nx, ny, m);
+      if (movedLeft && movedRight) {
+        grid2[ny + 1][nx - 1] = "[";
+        grid2[ny + 1][nx] = "]";
+        grid2[ny][nx] = curr;
+        grid2[ny][nx - 1] = ".";
+        grid2[y][x] = ".";
+        return true;
+      }
+    } else if (next == ".") {
+      grid2[ny][nx] = curr;
+      grid2[y][x] = ".";
+      return true;
+    }
+  } else if (m == "^") {
+    if (next == "#") return false;
+    else if (next == "[") {
+      let movedLeft = move(nx, ny, m);
+      let movedRight = move(nx + 1, ny, m);
+      if (movedLeft && movedRight) {
+        grid2[ny - 1][nx] = "[";
+        grid2[ny - 1][nx + 1] = "]";
+        grid2[ny][nx] = curr;
+        grid2[ny][nx + 1] = ".";
+        grid2[y][x] = ".";
+        return true;
+      }
+    } else if (next == "]") {
+      let movedLeft = move(nx - 1, ny, m);
+      let movedRight = move(nx, ny, m);
+      if (movedLeft && movedRight) {
+        grid2[ny - 1][nx - 1] = "[";
+        grid2[ny - 1][nx] = "]";
+        grid2[ny][nx] = curr;
+        grid2[ny][nx - 1] = ".";
+        grid2[y][x] = ".";
+        return true;
+      }
+    } else if (next == ".") {
+      grid2[ny][nx] = curr;
+      grid2[y][x] = ".";
+      return true;
+    }
+  }
+
+  return false;
+};
+
+[x, y] = [2 * (bot % w), (bot / w) | 0];
+for (let m of moves) {
+  if (canMove(x, y, m)) {
+    move(x, y, m);
+    let [dx, dy] = dir(m);
+    [x, y] = [x + dx, y + dy];
+  }
 }
 
-// console.log(grid2.map((row) => row.join("")).join("\n"));
-
 let part2 = 0;
+for (let y = 0; y < h; y++) {
+  for (let x = 0; x < 2 * w; x++) {
+    if (grid2[y][x] == "[") {
+      part2 += x + y * 100;
+    }
+  }
+}
 console.log("part2 =", part2);
-// =
+// =1457703
