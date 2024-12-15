@@ -61,48 +61,25 @@ let dir = (m) => [
   m == "<" ? -1 : m == ">" ? 1 : 0,
   m == "^" ? -1 : m == "v" ? 1 : 0,
 ];
+
 let canMove = (x, y, m) => {
-  let curr = grid2[y][x];
   let [dx, dy] = dir(m);
   let [nx, ny] = [x + dx, y + dy];
   let next = grid2[ny][nx];
-
-  if (m == "<") {
-    if (next == "#") return false;
-    else if (next == "]") {
-      return canMove(nx - 1, ny, m);
-    } else if (next == ".") {
-      return true;
-    }
-  } else if (m == ">") {
-    if (next == "#") return false;
-    else if (next == "[") {
-      return canMove(nx + 1, ny, m);
-    } else if (next == ".") {
-      return true;
-    }
-  } else if (m == "v") {
-    if (next == "#") return false;
-    else if (next == "[") {
-      return canMove(nx, ny, m) && canMove(nx + 1, ny, m);
-    } else if (next == "]") {
-      return canMove(nx - 1, ny, m) && canMove(nx, ny, m);
-    } else if (next == ".") {
-      return true;
-    }
-  } else if (m == "^") {
-    if (next == "#") return false;
-    else if (next == "[") {
-      return canMove(nx, ny, m) && canMove(nx + 1, ny, m);
-    } else if (next == "]") {
-      return canMove(nx - 1, ny, m) && canMove(nx, ny, m);
-    } else if (next == ".") {
-      return true;
-    }
+  if (next == ".") return true;
+  if (next == "[") {
+    if (m == ">") return canMove(nx + 1, ny, m);
+    else if (m == "v") return canMove(nx, ny, m) && canMove(nx + 1, ny, m);
+    else if (m == "^") return canMove(nx, ny, m) && canMove(nx + 1, ny, m);
   }
-
+  if (next == "]") {
+    if (m == "<") return canMove(nx - 1, ny, m);
+    else if (m == "v") return canMove(nx - 1, ny, m) && canMove(nx, ny, m);
+    else if (m == "^") return canMove(nx - 1, ny, m) && canMove(nx, ny, m);
+  }
   return false;
 };
+
 let move = (x, y, m) => {
   let curr = grid2[y][x];
   let [dx, dy] = dir(m);
@@ -110,106 +87,54 @@ let move = (x, y, m) => {
   let next = grid2[ny][nx];
 
   if (m == "<") {
-    if (next == "#") return false;
-    else if (next == "]") {
-      if (move(nx - 1, ny, m)) {
-        grid2[ny][nx - 2] = "[";
-        grid2[ny][nx - 1] = "]";
-        grid2[ny][nx] = curr;
-        grid2[y][x] = ".";
-        return true;
-      }
-    } else if (next == ".") {
-      grid2[ny][nx] = curr;
-      grid2[y][x] = ".";
-      return true;
+    if (next == "]") {
+      move(nx - 1, ny, m);
+      grid2[ny][nx - 2] = "[";
+      grid2[ny][nx - 1] = "]";
     }
   } else if (m == ">") {
-    if (next == "#") return false;
-    else if (next == "[") {
-      if (move(nx + 1, ny, m)) {
-        grid2[ny][nx + 1] = "[";
-        grid2[ny][nx + 2] = "]";
-        grid2[ny][nx] = curr;
-        grid2[y][x] = ".";
-        return true;
-      }
-    } else if (next == ".") {
-      grid2[ny][nx] = curr;
-      grid2[y][x] = ".";
-      return true;
+    if (next == "[") {
+      move(nx + 1, ny, m);
+      grid2[ny][nx + 1] = "[";
+      grid2[ny][nx + 2] = "]";
     }
   } else if (m == "v") {
-    if (next == "#") return false;
-    else if (next == "[") {
-      let movedLeft = move(nx, ny, m);
-      let movedRight = move(nx + 1, ny, m);
-      if (movedLeft && movedRight) {
-        grid2[ny + 1][nx] = "[";
-        grid2[ny + 1][nx + 1] = "]";
-        grid2[ny][nx] = curr;
-        grid2[ny][nx + 1] = ".";
-        grid2[y][x] = ".";
-        return true;
-      }
+    if (next == "[") {
+      move(nx, ny, m);
+      move(nx + 1, ny, m);
+      grid2[ny + 1][nx] = "[";
+      grid2[ny + 1][nx + 1] = "]";
+      grid2[ny][nx + 1] = ".";
     } else if (next == "]") {
-      let movedLeft = move(nx - 1, ny, m);
-      let movedRight = move(nx, ny, m);
-      if (movedLeft && movedRight) {
-        grid2[ny + 1][nx - 1] = "[";
-        grid2[ny + 1][nx] = "]";
-        grid2[ny][nx] = curr;
-        grid2[ny][nx - 1] = ".";
-        grid2[y][x] = ".";
-        return true;
-      }
-    } else if (next == ".") {
-      grid2[ny][nx] = curr;
-      grid2[y][x] = ".";
-      return true;
+      move(nx - 1, ny, m);
+      move(nx, ny, m);
+      grid2[ny + 1][nx - 1] = "[";
+      grid2[ny + 1][nx] = "]";
+      grid2[ny][nx - 1] = ".";
     }
   } else if (m == "^") {
-    if (next == "#") return false;
-    else if (next == "[") {
-      let movedLeft = move(nx, ny, m);
-      let movedRight = move(nx + 1, ny, m);
-      if (movedLeft && movedRight) {
-        grid2[ny - 1][nx] = "[";
-        grid2[ny - 1][nx + 1] = "]";
-        grid2[ny][nx] = curr;
-        grid2[ny][nx + 1] = ".";
-        grid2[y][x] = ".";
-        return true;
-      }
+    if (next == "[") {
+      move(nx, ny, m);
+      move(nx + 1, ny, m);
+      grid2[ny - 1][nx] = "[";
+      grid2[ny - 1][nx + 1] = "]";
+      grid2[ny][nx + 1] = ".";
     } else if (next == "]") {
-      let movedLeft = move(nx - 1, ny, m);
-      let movedRight = move(nx, ny, m);
-      if (movedLeft && movedRight) {
-        grid2[ny - 1][nx - 1] = "[";
-        grid2[ny - 1][nx] = "]";
-        grid2[ny][nx] = curr;
-        grid2[ny][nx - 1] = ".";
-        grid2[y][x] = ".";
-        return true;
-      }
-    } else if (next == ".") {
-      grid2[ny][nx] = curr;
-      grid2[y][x] = ".";
-      return true;
+      move(nx - 1, ny, m);
+      move(nx, ny, m);
+      grid2[ny - 1][nx - 1] = "[";
+      grid2[ny - 1][nx] = "]";
+      grid2[ny][nx - 1] = ".";
     }
   }
 
-  return false;
+  grid2[ny][nx] = curr;
+  grid2[y][x] = ".";
+  return [nx, ny];
 };
 
 [x, y] = [2 * (bot % w), (bot / w) | 0];
-for (let m of moves) {
-  if (canMove(x, y, m)) {
-    move(x, y, m);
-    let [dx, dy] = dir(m);
-    [x, y] = [x + dx, y + dy];
-  }
-}
+for (let m of moves) if (canMove(x, y, m)) [x, y] = move(x, y, m);
 
 let part2 = 0;
 for (let y = 0; y < h; y++) {
