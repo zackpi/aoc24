@@ -39,4 +39,4 @@ function ways(design) {
 
 let part2 = eval(designs.map(ways).join("+"));
 console.log("part2 =", part2);
-// =
+// =950763269786650
