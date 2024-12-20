@@ -2,58 +2,91 @@ let raw = await Bun.file("day20/input").text();
 let grid = raw.split("\n");
 let w = grid[0].length;
 let h = grid.length;
-let char = (i) => grid[(i / w) | 0][i % w];
+let pair = (i) => [i % w, (i / w) | 0];
 
-let START = grid.join("").indexOf("S");
-let END = grid.join("").indexOf("E");
+let START = pair(grid.join("").indexOf("S"));
+let END = pair(grid.join("").indexOf("E"));
 
-let step = (p, d) => {
-  if (d === 0) return [p - w, p / w > 0];
-  if (d === 1) return [p + w, p / w < h - 1];
-  if (d === 2) return [p - 1, p % w > 0];
-  if (d === 3) return [p + 1, p % w < w - 1];
-};
+let dirs = [
+  [0, 1],
+  [1, 0],
+  [0, -1],
+  [-1, 0],
+];
+let key = (x, y) => x + "," + y;
 
-function spsp(cheat) {
-  let q = [[START, 0]];
-  let seen = new Set([START]);
+function cheats(len) {
+  // bfs to calculate APSP from all empty cells (no cheats)
+  let apsp = {};
+  {
+    let q = [[END, 0]];
+    let seen = new Set([key(...END)]);
+    while (q.length) {
+      let [[x, y], steps] = q.shift();
+      let k = key(x, y);
+      if (apsp[k] !== undefined) continue;
+      apsp[k] = steps;
 
-  while (q.length) {
-    let [p, s] = q.shift();
-    for (let d = 0; d < 4; d++) {
-      let [np, bounds] = step(p, d);
-      if (!bounds || seen.has(np)) continue;
-      seen.add(np);
-      if (np === END) return s + 1;
-      if (char(np) === "#" && np !== cheat) continue;
-      q.push([np, s + 1]);
+      for (let d of dirs) {
+        let [nx, ny] = [x + d[0], y + d[1]];
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        if (grid[ny][nx] === "#") continue;
+
+        let nk = key(nx, ny);
+        if (seen.has(nk)) continue;
+        seen.add(nk);
+
+        q.push([[nx, ny], steps + 1]);
+      }
+    }
+  }
+  let nocheat = apsp[key(...START)];
+
+  // bfs (with cheats!)
+  let nCheats = 0;
+  {
+    let q = [[START, 0]];
+    let seen = new Set([key(...START)]);
+    while (q.length) {
+      let [[x, y], steps] = q.shift();
+
+      for (let d of dirs) {
+        let [nx, ny] = [x + d[0], y + d[1]];
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        if (grid[ny][nx] === "#") continue;
+
+        let nk = key(nx, ny);
+        if (seen.has(nk)) continue;
+        seen.add(nk);
+
+        q.push([[nx, ny], steps + 1]);
+      }
+
+      // CHEAT!
+      for (let dx = -len; dx <= len; dx++) {
+        for (let dy = -len; dy <= len; dy++) {
+          if (dx === 0 && dy === 0) continue;
+          let manhat = Math.abs(dx) + Math.abs(dy);
+          if (manhat > len) continue;
+          let [nx, ny] = [x + dx, y + dy];
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          if (grid[ny][nx] === "#") continue;
+
+          let rest = apsp[key(nx, ny)];
+          let total = steps + manhat + rest;
+          if (nocheat - total >= 100) nCheats++;
+        }
+      }
     }
   }
 
-  return -1;
+  return nCheats;
 }
 
-function apsp() {
-  let nocheat = spsp(-1);
-
-  let cheats = {};
-  let nAbove100 = 0;
-  for (let i = 0; i < w * h; i++) {
-    if (char(i) !== "#") continue;
-    let steps = spsp(i);
-    if (steps < 0) continue;
-    let saved = nocheat - steps;
-    cheats[saved] = (cheats[saved] || 0) + 1;
-    if (saved >= 100) nAbove100++;
-  }
-
-  return nAbove100;
-}
-
-let part1 = apsp();
+let part1 = cheats(2);
 console.log("part1 =", part1);
 // =1441
 
-let part2 = 0;
+let part2 = cheats(20);
 console.log("part2 =", part2);
-// =
+// =1021490
