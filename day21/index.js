@@ -70,27 +70,61 @@ function sequence(pad, code) {
   return seqs.map((s) => s.join("A") + "A");
 }
 
-function complexity(code) {
+function exec(n, code) {
+  console.log("exec:", n, code);
+  if (n === 1) return code.length;
+  let min = 0;
+  for (let subcode of sequence(dpad, code)) {
+    let steps = exec(n - 1, subcode);
+    if (steps < min) min = steps;
+  }
+  return min;
+}
+
+function complexity(code, n) {
   let minComplexity = Infinity;
   let minSequence = null;
   for (let seqNum of sequence(numpad, code)) {
-    for (let seqDir1 of sequence(dpad, seqNum)) {
-      for (let seq of sequence(dpad, seqDir1)) {
-        let complexity = seq.length;
-        if (complexity < minComplexity) {
-          minComplexity = complexity;
-          minSequence = seq;
-        }
-      }
+    let steps = exec(n, seqNum);
+    if (steps < minComplexity) {
+      minComplexity = steps;
+      minSequence = seqNum;
     }
+    // for (let seqDir1 of sequence(dpad, seqNum)) {
+    //   let localMinComplexity = Infinity;
+    //   let localMinSequence = null;
+    //   for (let seqDir2 of sequence(dpad, seqDir1)) {
+    //     let complexity = seqDir2.length;
+    //     if (complexity < localMinComplexity) {
+    //       localMinComplexity = complexity;
+    //       localMinSequence = seqDir2;
+    //     }
+    //   }
+
+    //   if (localMinComplexity < minComplexity) {
+    //     minComplexity = localMinComplexity;
+    //     minSequence = localMinSequence;
+    //   }
+    // }
   }
   return minComplexity;
 }
 
-let sum = 0;
-for (let code of codes) {
-  let cmp = complexity(code);
-  let num = Number(code.slice(0, 3));
-  sum += cmp * num;
+function part(n) {
+  let sum = 0;
+  for (let code of codes) {
+    console.log("code:", code);
+    let cmp = complexity(code, n);
+    let num = Number(code.slice(0, 3));
+    sum += cmp * num;
+  }
+  return sum;
 }
-console.log(sum);
+
+let part1 = part(2);
+console.log("part1 =", part1);
+// =137870
+
+// let part2 = part(25);
+// console.log("part2 =", part2);
+// // =
