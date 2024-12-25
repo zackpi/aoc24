@@ -80,20 +80,51 @@ function exec(n, code) {
   return min;
 }
 
+let memo = {};
+function minSequence(state, from, to) {
+  let key = `${state.join(",")}:${from}->${to}`;
+  if (key in memo) {
+    console.log("hit");
+    return memo[key];
+  }
+
+  let minSteps = Infinity;
+
+  let [sx, sy] = pair(dpad.indexOf(from));
+  let [ex, ey] = pair(dpad.indexOf(to));
+  let dx = ex - sx;
+  let dy = ey - sy;
+  if (n === 0) {
+    minSteps = Math.abs(dx) + Math.abs(dy);
+  } else {
+    let sequence = choose(dpad, sx, sy, dx, dy);
+
+    console.log("sequence:", sequence);
+  }
+
+  return (memo[key] = minSteps);
+}
+
 function complexity(code, n) {
-  let minComplexity = Infinity;
-  let minSequence = null;
+  let minComp = Infinity;
+  let minSeq = null;
   console.log();
   console.log("complexity:", code, n);
   for (let seqNum of sequence(numpad, code)) {
     console.log("  seqNum:", seqNum);
-    let steps = exec(n, seqNum);
-    if (steps < minComplexity) {
-      minComplexity = steps;
-      minSequence = seqNum;
+
+    let state = Array(n).fill("A");
+    for (let char of seqNum) {
+      let steps = minSequence(state, char);
+      console.log("    steps:", state[0], "->", char, "=", steps);
+      last = char;
+      if (steps < minComp) {
+        minComp = steps;
+        minSeq = seqNum;
+      }
     }
   }
-  return minComplexity;
+  return minComp;
 }
 
 function part(n) {
@@ -109,6 +140,7 @@ function part(n) {
 let part1 = part(2);
 console.log("part1 =", part1);
 // =137870
+
 process.exit(0);
 
 let part2 = part(25);
