@@ -21,6 +21,6 @@ for (let key of keys) {
 console.log("part1 =", part1);
 // =3242
 
-let part2 = 0;
+let part2 = "Merry Christmas!";
 console.log("part2 =", part2);
-// =
+// =Merry Christmas!
