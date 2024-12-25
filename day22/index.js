@@ -17,22 +17,26 @@ console.log("part1 =", part1);
 // =19854248602
 
 let bananas = {};
-let key = (s) => s.slice(-4).join(",");
 for (let x of secrets) {
-  let prev = 0;
-  let seq = [];
+  let a, b, c, d, e;
   let seen = {};
+
+  a = x % 10;
   for (let i = 0; i < 2000; i++) {
     x = next(x);
-    let price = x % 10;
-    seq.push(price - prev);
-    prev = price;
 
-    if (i < 4) continue;
-    let k = key(seq);
-    if (seen[k]) continue;
-    seen[k] = true;
-    bananas[k] = (bananas[k] || 0) + price;
+    if (i === 0) b = x % 10;
+    else if (i === 1) c = x % 10;
+    else if (i === 2) d = x % 10;
+    else {
+      e = x % 10;
+      let k = [b - a, c - b, d - c, e - d].join(",");
+      [a, b, c, d] = [b, c, d, e];
+
+      if (seen[k]) continue;
+      seen[k] = true;
+      bananas[k] = (bananas[k] || 0) + e;
+    }
   }
 }
 
@@ -46,4 +50,4 @@ for (let k in bananas) {
 }
 let part2 = maxNanas;
 console.log("part2 =", part2);
-// =2218 (?????)
+// =2223
